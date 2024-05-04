@@ -9,9 +9,7 @@ const target = ref(null)
 const { x, y, elementX, elementY, isOutside } = useMouseInElement(target)
 
 // const rect = reactive(new RRect())
-const rect = reactive({
-  x: 0, y: 0, x1: 0, y1: 0, x2: 0, y2: 0
-})
+const rect = reactive(new RRect())
 
 const isDraw = ref(false)
 
@@ -30,16 +28,23 @@ const rr = computed(() => {
     rect.x2 = Math.round(Math.max(rect.x, elementX.value))
     rect.y1 = Math.round(Math.min(rect.y, elementY.value))
     rect.y2 = Math.round(Math.max(rect.y, elementY.value))
+    rect.width = Math.abs(rect.x1-rect.x2)
+    rect.height = Math.abs(rect.y1-rect.y2)
   }
   return rect
+})
 
+const isVisible = computed(()=>{
+  if(!isDraw.value) {
+    return rect.width>30 && rect.height>30
+  } else  return true
 })
 
 </script>
 
 <template>
   <div class="svg_container flex">
-    <div class="info w-60 p-3">
+    <div class="info p-3">
       <div>posXY: {{ x }}, {{ y }}</div>
       <div>posXY el: {{ elementX }}, {{ elementY }}</div>
       <div>isOutside: {{ isOutside }}</div>
@@ -47,9 +52,11 @@ const rr = computed(() => {
         <pre>{{ rr }}</pre>
       </div>
     </div>
-    <svg class="draw_container grow h-full" ref="target" @mousedown="mouseDown" @mouseup="mouseUp">
-      <SvgRect :x1="rect.x1" :y1="rect.y1" :x2="rect.x2" :y2="rect.y2" />
-      <!-- <SvgRect :rect="rect"/> -->
+    <svg class="draw_container" ref="target" viewBox="0 0 650 500"
+      @mousedown="mouseDown"
+      @mouseup="mouseUp"
+    >
+      <SvgRect v-if="isVisible" :rect="rect"/> 
     </svg>
   </div>
 </template>
@@ -57,12 +64,15 @@ const rr = computed(() => {
 <style lang="scss">
 .svg_container {
   border: 1px solid #5a5a5a;
-  width: 800px;
-  height: 350px;
   user-select: none;
 
   .info {
     border-right: 1px solid #5a5a5a;
+    width: 170px;
+  }
+  .draw_container{
+    width: 650px;
+    height: 500px;
   }
 }
 </style>

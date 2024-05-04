@@ -1,22 +1,58 @@
 <script setup lang="ts">
 
+import { computed } from 'vue';
 import RRect from '../models/RRect';
+import SvgSizeHelp from './SvgSizeHelp.vue';
+import SizeHelp from '../models/SizeHelp';
 
-const props = defineProps<{
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-}>()
+const {rect} = defineProps<{rect: RRect}>()
 
+// const 
+
+const Sizeh = computed(()=>{
+  return {
+    x1: rect.x1,
+    x2: rect.x2,
+    y1: rect.y1,
+    y2: rect.y2,
+    width: rect.width,
+    height: rect.height,    
+  } as SizeHelp
+})
 
 
 </script>
 
 <template>
-  <rect class="" ref="" :x="props.x1" :y="props.y1" :width="props.x2 - props.x1" :height="props.y2 - props.y1"
-    style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);">
-  </rect>
+  <SvgSizeHelp :size="Sizeh" />
+
+
+  <rect class="rrect" 
+   :x="rect.x1" 
+   :y="rect.y1" 
+   :width="rect.width" 
+   :height="rect.height"
+   :rx="rect.rx"
+  ></rect>
 </template>
 
-<style lang="scss"></style>
+<style lang="scss">
+  g{
+    stroke: rgba($color: #1979ff, $alpha: 1);
+    stroke-width: 2;
+    
+  }
+  .dash{
+    stroke-dasharray: 3,2;
+  }
+  text{
+    text-anchor: middle;
+    stroke: none;
+    fill: rgba($color: #ffffff, $alpha: 1);
+  }
+  .rrect{   
+    fill: rgba($color: #fff, $alpha: 0.1);
+    stroke: rgba($color: #fff, $alpha: 0.5);
+    stroke-width: 1
+  }
+</style>

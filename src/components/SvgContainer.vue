@@ -28,16 +28,16 @@ const rr = computed(() => {
     rect.x2 = Math.round(Math.max(rect.x, elementX.value))
     rect.y1 = Math.round(Math.min(rect.y, elementY.value))
     rect.y2 = Math.round(Math.max(rect.y, elementY.value))
-    rect.width = Math.abs(rect.x1-rect.x2)
-    rect.height = Math.abs(rect.y1-rect.y2)
+    rect.width = Math.abs(rect.x1 - rect.x2)
+    rect.height = Math.abs(rect.y1 - rect.y2)
   }
   return rect
 })
 
-const isVisible = computed(()=>{
-  if(!isDraw.value) {
-    return rect.width>30 && rect.height>30
-  } else  return true
+const isVisible = computed(() => {
+  if (!isDraw.value) {
+    return rect.width > 30 && rect.height > 30
+  } else return true
 })
 
 </script>
@@ -52,11 +52,8 @@ const isVisible = computed(()=>{
         <pre>{{ rr }}</pre>
       </div>
     </div>
-    <svg class="draw_container" ref="target" viewBox="0 0 650 500"
-      @mousedown="mouseDown"
-      @mouseup="mouseUp"
-    >
-      <SvgRect v-if="isVisible" :rect="rect"/> 
+    <svg class="draw_container" ref="target" viewBox="0 0 650 500" @mousedown="mouseDown" @mouseup="mouseUp">
+      <SvgRect v-if="isVisible" :rect="rect" />
     </svg>
   </div>
 </template>
@@ -66,11 +63,13 @@ const isVisible = computed(()=>{
   border: 1px solid #5a5a5a;
   user-select: none;
 
+
   .info {
     border-right: 1px solid #5a5a5a;
     width: 170px;
   }
-  .draw_container{
+
+  .draw_container {
     width: 650px;
     height: 500px;
   }

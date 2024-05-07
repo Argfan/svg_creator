@@ -8,6 +8,7 @@ export default class RRect {
   width: number = 0
   height: number = 0
   rx: number = 3
+  isDone: boolean = false
 
   public constructor(init?: Partial<RRect>) {
     Object.assign(this, init);

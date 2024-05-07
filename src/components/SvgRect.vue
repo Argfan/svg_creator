@@ -1,33 +1,43 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, toRefs } from 'vue';
 import RRect from '../models/RRect';
 import SvgSizeHelp from './SvgSizeHelp.vue';
 import SizeHelp from '../models/SizeHelp';
+import dCreator from '../service/dCreator';
 
-const { rect } = defineProps<{ rect: RRect }>()
+const prop = defineProps<{ rect: RRect }>()
+const {rect} = toRefs(prop)
 
 const Sizeh = computed(() => {
   return {
-    x1: rect.x1,
-    x2: rect.x2,
-    y1: rect.y1,
-    y2: rect.y2,
-    width: rect.width,
-    height: rect.height,
+    x1: rect.value.x1,
+    x2: rect.value.x2,
+    y1: rect.value.y1,
+    y2: rect.value.y2,
+    width: rect.value.width,
+    height: rect.value.height,
   } as SizeHelp
 })
+
+const d = computed(()=>{
+  return  rect.value.width>20 && rect.value.height>20 ? dCreator(rect.value) + dCreator(rect.value, 10) : dCreator(rect.value)
+})
+
 </script>
 
 <template>
-  <SvgSizeHelp :size="Sizeh" />
-  <rect class="rrect" :x="rect.x1" :y="rect.y1" :width="rect.width" :height="rect.height" :rx="rect.rx"></rect>
+  <SvgSizeHelp :size="Sizeh" />  
+  <path
+    :d="d"
+    fill="url(#wall-pattern)"
+  />   
+
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 g {
   stroke: rgba($color: #1979ff, $alpha: 1);
   stroke-width: 1;
-
 }
 
 .dash {
@@ -40,9 +50,11 @@ text {
   fill: rgba($color: #ffffff, $alpha: 1);
 }
 
+
 .rrect {
-  fill: rgba($color: #fff, $alpha: 0.1);
+  // fill: rgba($color: #fff, $alpha: 0.1);
   stroke: rgba($color: #fff, $alpha: 0.5);
-  stroke-width: 1
+  // stroke-width: 1;
+  paint-order: stroke;
 }
 </style>

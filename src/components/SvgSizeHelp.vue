@@ -50,7 +50,7 @@ const centerH = computed(() => {
   </g>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 g {
   stroke: rgba($color: #1979ff, $alpha: 1);
   stroke-width: 1;
@@ -66,14 +66,14 @@ path {
 }
 
 rect {
-  stroke-width: 1;
+  stroke-width: 1;  
 }
 
 text {
   text-anchor: middle;
   stroke: none;
   // font-size: 12px;
-  fill: rgba($color: #ffffff, $alpha: 1);
+  fill: var(--color1);
   transform-box: fill-box;
   transform-origin: center;
 }

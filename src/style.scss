@@ -2,7 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
-body{
-  background-color: #171616;
-  color: #fff;
+html{
+  --bg-color1: #f3f3f3;
+  --bg-color2: #00aaff2d;
+  --bg-color3: #00aaffae;
+  --bg-color4: #00aaff3b;
+
+  --bg-btn-c1: #00aaffd5;
+  --bg-pt1-color: #0059be;
+
+  --border-color1: #b5b5b5;
+  --border-color2: #00aaff6e;
+  --color1: #232323;
+  --color2: #00aaff; 
+  &.dark{    
+    --bg-color1: #171616;
+    --border-color1: #5a5a5a;
+    --color1: #fff;
+    --bg-pt1-color: #f0f0f0;
+  }
+}
+
+body{  
+  background-color: var(--bg-color1);
+  color: var(--color1);
+  transition: 0.2s background-color;
+}
+
+.svg_container {
+  border: 1px solid var(--border-color1);
+  user-select: none;
+
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
+  image-rendering: optimizeQuality;
+  fill-rule: evenodd;
+  clip-rule: evenodd;
+
+  .info {
+    border-right: 1px solid var(--border-color1);
+    width: 170px;
+  }
+
+  .draw_container {
+    width: 650px;
+    height: 500px;
+  }
+  .centerT{
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: rotate(-45);
+  }
+}
+
+
+pattern#wall-pattern{
+  animation: wspin 10s linear infinite;
+  rect, path{
+    fill: var(--bg-pt1-color);
+  }
+  rect{
+    fill-opacity: 0.3;
+  }
+  path{
+    fill-opacity: 0.7;
+  }
+}
+
+@keyframes wspin {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100px);
+  }
+}
+
+// .wallPC1{
+//   stroke: none;
+//   fill: #0059be;
+//   fill-opacity: 0.3;
+// }
+// .wallPC2{
+//   stroke: none;
+//   fill: #0059be;
+//   fill-opacity: 0.7;
+// }
+
+html.dark{
+  // .wallPC1{
+  //   fill: #fff;
+  //   fill-opacity: 0.3;
+  // }
+  // .wallPC2{
+  //   stroke: none;
+  //   fill: #fff;
+  //   fill-opacity: 0.7;
+  // }
+
+  // .d_control{
+  //   .dc_item{
+  //     background-color: var(--bg-color3);
+  //     fill: #fff;
+  //   }
+  // }
+  
+}
+
+.d_control{
+  .dc_item{
+    background-color: var(--bg-color4);
+    border: 2px solid transparent;
+    width: 2rem;
+    height: 2rem;
+    margin-bottom: .5rem;
+    border-radius: 0.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    fill: var(--bg-btn-c1);
+    cursor: pointer;
+    opacity: 0.8;
+    transition: 0.2s;
+    &:hover{
+      opacity: 1;
+      border-color: var(--bg-color3);
+    }
+    path{
+      stroke: none;
+    }
+    // rect, path{
+    //   --bg-pt1-color: 
+    // }
+    
+  }
 }

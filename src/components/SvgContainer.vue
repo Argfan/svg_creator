@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { useMouseInElement } from '@vueuse/core';
-import { reactive, ref, computed } from 'vue';
+import { useMouseInElement, watchPausable } from '@vueuse/core';
+import { reactive, ref, computed, watch, Ref } from 'vue';
 import SvgRect from './SvgRect.vue'
 import RRect from '../models/RRect';
 import SvgSizeCorrect from './SvgSizeCorrect.vue'
+import cursorArr from '../moks/cursorArr';
 
 const target = ref(null)
 
@@ -13,6 +14,12 @@ const { x, y, elementX, elementY, isOutside } = useMouseInElement(target)
 const rect = reactive(new RRect())
 
 const isDraw = ref(false)
+const sc_isMove = ref(false)
+
+const dif_X  = ref(0)
+const dif_Y  = ref(0)
+
+const cursor = ref(cursorArr.a)
 
 const mouseDown = () => {
   if(!rect.isDone){
@@ -32,10 +39,10 @@ const rr = computed(() => {
     rect.x1 = Math.round(Math.min(rect.x, elementX.value))
     rect.x2 = Math.round(Math.max(rect.x, elementX.value))
     rect.y1 = Math.round(Math.min(rect.y, elementY.value))
-    rect.y2 = Math.round(Math.max(rect.y, elementY.value))
-    rect.width = Math.abs(rect.x1 - rect.x2)
-    rect.height = Math.abs(rect.y1 - rect.y2)
+    rect.y2 = Math.round(Math.max(rect.y, elementY.value))    
   }
+  rect.width = Math.abs(rect.x1 - rect.x2)
+  rect.height = Math.abs(rect.y1 - rect.y2)
   return rect
 })
 
@@ -48,6 +55,112 @@ const isVisible = computed(() => {
 const rectClear = ()=>{
   Object.assign(rect, new RRect())
 }
+
+const { pause, resume } = watchPausable(
+  [elementX, elementY], () => wer(),
+)
+pause()
+
+
+type keyArr = Array<keyof RRect>
+const dPoint: Ref<keyArr>= ref(['x1'])
+const dType =ref('h')
+
+const sc_h1_move = (b: boolean, type: string, d: keyArr)=>{
+  if(b){
+    if(!sc_isMove.value) {
+      
+      dType.value = type
+      
+      dPoint.value = d
+      dPoint.value.forEach(el=>{
+         dif_X.value = elementX.value - (+rect[el]);
+         dif_Y.value = elementY.value - (+rect[el]);
+      })
+       
+      if(dType.value=='h') cursor.value = cursorArr.e
+      if(dType.value=='v') cursor.value = cursorArr.n
+      if(dType.value=='hv') cursor.value = cursorArr.ne
+      if(dType.value=='vh') cursor.value = cursorArr.nw
+      sc_isMove.value = true
+      resume()
+    }
+  } else MoveReset()
+}
+
+const MoveReset =()=>{
+  sc_isMove.value = false
+  cursor.value = cursorArr.a
+  pause()
+}
+
+const wer = ()=>{
+  if(sc_isMove.value){
+    
+    // dPoint.value.forEach((el: keyof RRect)=>{
+      if(rect.width>=40 && rect.height>=40){
+
+        if(dType.value=='h') rect[dPoint.value[0]] = elementX.value - dif_X.value
+        if(dType.value=='v') rect[dPoint.value[0]] = elementY.value - dif_Y.value
+        if(dType.value=='hv') {
+          rect[dPoint.value[0]] = elementX.value - dif_X.value
+          rect[dPoint.value[1]] = elementY.value - dif_Y.value
+        } 
+      }
+      else {
+        if(dPoint.value[0]=='x1') rect.x1 = rect.x2 - 40
+        if(dPoint.value[0]=='x2') rect.x2 = rect.x1 + 40
+        if(dPoint.value[0]=='y1') rect.y1 = rect.y2 - 40
+        if(dPoint.value[0]=='y2') rect.y2 = rect.y1 + 40
+        
+        MoveReset()
+      } 
+    // })
+
+    // if(dPoint.value[0] == 'x1'){
+    //   if(elementX.value<=rect.x2-30) 
+    //   rect.x1 = elementX.value - dif_X.value      
+    // }
+    // if(dPoint.value[0] == 'x2'){
+    //   if(elementX.value>=rect.x1+30) 
+    //   rect.x2 = elementX.value - dif_X.value      
+    // }
+    // if(dPoint.value[0] == 'y1'){
+    //   if(elementY.value<=rect.y2-30) 
+    //   rect.y1 = elementY.value - dif_Y.value      
+    // }
+    // if(dPoint.value[0] == 'y2'){
+    //   if(elementY.value>=rect.y1+30) 
+    //   rect.y2 = elementY.value - dif_Y.value      
+    // }
+  }
+}
+
+const sc_H1 = computed(()=>{
+  return { x: rect.x1, y: rect.y1, w: 10, h: rect.height, c_type: cursorArr.e}
+})
+const sc_H2 = computed(()=>{
+  return { x: rect.x2-10, y: rect.y1, w: 10, h: rect.height, c_type: cursorArr.e}
+})
+const sc_V1 = computed(()=>{
+  return { x: rect.x1, y: rect.y1, w: rect.width, h: 10, c_type: cursorArr.n}
+})
+const sc_V2 = computed(()=>{
+  return { x: rect.x1, y: rect.y2-10, w: rect.width, h: 10, c_type: cursorArr.n}
+})
+const sc_H1V1 = computed(()=>{
+  return { x: rect.x1-10, y: rect.y1-10, w: 30, h: 30, c_type: cursorArr.nw}
+})
+const sc_H2V1 = computed(()=>{
+  return { x: rect.x2-20, y: rect.y1-10, w: 30, h: 30, c_type: cursorArr.ne}
+})
+const sc_H1V2 = computed(()=>{
+  return { x: rect.x1-10, y: rect.y2-20, w: 30, h: 30, c_type: cursorArr.ne}
+})
+const sc_H2V2 = computed(()=>{
+  return { x: rect.x2-20, y: rect.y2-20, w: 30, h: 30, c_type: cursorArr.nw}
+})
+
 
 </script>
 
@@ -67,8 +180,10 @@ const rectClear = ()=>{
       <rect width="100%" height="100%" fill="url(#pattern)" filter="url(#filter)"></rect>
   </svg> -->
 
-  <div class="svg_container flex relative">
-    <div class="info p-3">
+  <div class="svg_container flex relative"
+    :style="{'cursor': cursor}"
+  >
+    <div class="info p-3">      
       <div>posXY: {{ x }}, {{ y }}</div>
       <div>posXY el: {{ elementX }}, {{ elementY }}</div>
       <div>isOutside: {{ isOutside }}</div>
@@ -91,7 +206,14 @@ const rectClear = ()=>{
       </pattern>  
 
       <SvgRect v-if="isVisible" :rect="rect" />
-      <SvgSizeCorrect :rect="rect" />
+      <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H1"    @sc_h1_move="b=>sc_h1_move(b, 'h', ['x1'])" />
+      <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H2"    @sc_h1_move="b=>sc_h1_move(b, 'h', ['x2'])" />
+      <SvgSizeCorrect v-if="rect.isDone" :dd="sc_V1"    @sc_h1_move="b=>sc_h1_move(b, 'v', ['y1'])" />
+      <SvgSizeCorrect v-if="rect.isDone" :dd="sc_V2"    @sc_h1_move="b=>sc_h1_move(b, 'v', ['y2'])" />
+      <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H1V1"  @sc_h1_move="b=>sc_h1_move(b, 'hv', ['x1', 'y1'])" />
+      <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H2V1"  @sc_h1_move="b=>sc_h1_move(b, 'vh', ['x2', 'y1'])" />
+      <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H1V2"  @sc_h1_move="b=>sc_h1_move(b, 'hv', ['x1', 'y2'])" />
+      <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H2V2"  @sc_h1_move="b=>sc_h1_move(b, 'vh', ['x2', 'y2'])" />
       
     </svg>
     <div class="d_control absolute left-full t-0 px-3">

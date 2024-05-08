@@ -10,6 +10,9 @@ export default class RRect {
   rx: number = 3
   isDone: boolean = false
 
+  moveX:string= 'x1'
+  moveY:string= 'y1'
+
   public constructor(init?: Partial<RRect>) {
     Object.assign(this, init);
   }

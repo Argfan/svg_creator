@@ -3,7 +3,7 @@ import { computed, ref, toRefs } from 'vue';
 import RRect from '../models/RRect';
 import SvgSizeHelp from './SvgSizeHelp.vue';
 import SizeHelp from '../models/SizeHelp';
-import dCreator from '../service/dCreator';
+import {dCreator} from '../service/helper';
 
 const prop = defineProps<{ rect: RRect }>()
 const {rect} = toRefs(prop)

@@ -1,57 +1,29 @@
 <script setup lang="ts">
-import { computed, ref, toRefs } from 'vue';
-import RRect from '../models/RRect';
-import { useVModels } from '@vueuse/core';
+import { computed} from 'vue';
+import { creat_rect } from '../service/helper';
 
-
-// const prop = defineModel<{modelValue: RRect}>()
-
-const props = defineProps<{
-
-  rect: RRect,
-
-}>()
-// const emit = defineEmits<{ (e: 'update:rect', rect: RRect): void}>()
-
-const {rect} = props
-
-const curX = ref()
-
-
-
-const hMove = ()=>{
-  // props.rect.x1=rect.x1-10
-}
-
-const mDown=()=>{
-  
-}
-const mUp=()=>{
-
-}
-
+const props = defineProps<{dd: {x: number, y: number, w: number, h: number, c_type: string}}>()
+const emit = defineEmits<{ (e: 'sc_h1_move', a: boolean): void}>()
+const d = computed(()=>{
+  return creat_rect(props.dd.x, props.dd.y, props.dd.w, props.dd.h)
+})
 </script>
 
 <template>
   <g>
-        <path fill="rgba(0,255,0,0.5)" 
-          @click=""
-          @mousedown="mDown"
-          @mouseup="mUp"
-          :d="`
-            M ${rect.x1} ${rect.y1}
-            h 10
-            v ${rect.height}
-            h -10
-            v ${-rect.height}
-            z
-          `"
-        />
-      </g>
+    <path
+      :style="{'cursor': props.dd.c_type}"
+      @mousedown="$emit('sc_h1_move', true)"
+      @mouseup="$emit('sc_h1_move', false)"
+      :d="d"
+    />
+  </g>
 </template>
 
 <style lang="scss" scoped>
   path{
-    cursor: col-resize;
+    fill: rgba(0,255,0,1);
+    fill-opacity: 0;
+    &:hover{ fill-opacity: 0.5}    
   }
 </style>

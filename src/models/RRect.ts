@@ -1,4 +1,5 @@
 export default class RRect {
+  id: number = Date.now()
   x: number = 0
   y: number = 0
   x1: number = 0

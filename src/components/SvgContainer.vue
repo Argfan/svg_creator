@@ -10,8 +10,14 @@ const target = ref(null)
 
 const { x, y, elementX, elementY, isOutside } = useMouseInElement(target)
 
+
+
 // const rect = reactive(new RRect())
-const rect = reactive(new RRect())
+// const rect = reactive(new RRect())
+
+const rectList:Ref<RRect[]> = ref([])
+
+const isDrawRect = ref(false)
 
 const isDraw = ref(false)
 const sc_isMove = ref(false)
@@ -21,100 +27,104 @@ const dif_Y  = ref(0)
 
 const cursor = ref(cursorArr.a)
 
-const mouseDown = () => {
-  if(!rect.isDone){
-    rect.x = Math.round(elementX.value)
-    rect.y = Math.round(elementY.value)
+const mouseDown = () => {  
+  if(isDrawRect.value){
+    rectList.value.push(new RRect())
     isDraw.value = true
   }
-}
-const mouseUp = () => {
-  isDraw.value = false
-  if(isVisible.value) rect.isDone = true 
   
 }
 
-const rr = computed(() => {
-  if (isDraw.value) {
-    rect.x1 = Math.round(Math.min(rect.x, elementX.value))
-    rect.x2 = Math.round(Math.max(rect.x, elementX.value))
-    rect.y1 = Math.round(Math.min(rect.y, elementY.value))
-    rect.y2 = Math.round(Math.max(rect.y, elementY.value))    
-  }
-  rect.width = Math.abs(rect.x1 - rect.x2)
-  rect.height = Math.abs(rect.y1 - rect.y2)
-  return rect
-})
+const mouseUp = () => {
+  isDraw.value = false
+
+  // if(isVisible.value) rect.isDone = true 
+  
+}
+
+// const rr = computed(() => {
+//   if (isDraw.value) {
+//     rect.x1 = Math.round(Math.min(rect.x, elementX.value))
+//     rect.x2 = Math.round(Math.max(rect.x, elementX.value))
+//     rect.y1 = Math.round(Math.min(rect.y, elementY.value))
+//     rect.y2 = Math.round(Math.max(rect.y, elementY.value))    
+//   }
+//   rect.width = Math.abs(rect.x1 - rect.x2)
+//   rect.height = Math.abs(rect.y1 - rect.y2)
+//   return rect
+// })
 
 const isVisible = computed(() => {
-  if (!isDraw.value) {
-    return rect.width > 30 && rect.height > 30
-  } else return true
+  // if (!isDraw.value) {
+  //   return rect.width > 30 && rect.height > 30
+  // } else return true
+
+  return true
 })
 
 const rectClear = ()=>{
-  Object.assign(rect, new RRect())
+  // Object.assign(rect, new RRect())
+  rectList.value.pop()
 }
 
-const { pause, resume } = watchPausable(
-  [elementX, elementY], () => wer(),
-)
-pause()
+// const { pause, resume } = watchPausable(
+//   [elementX, elementY], () => wer(),
+// )
+// pause()
 
+// type keyArr = Array<keyof RRect>
+// const dPoint: Ref<keyArr>= ref(['x1'])
+// const dType =ref('h')
 
-type keyArr = Array<keyof RRect>
-const dPoint: Ref<keyArr>= ref(['x1'])
-const dType =ref('h')
-
-const sc_h1_move = (b: boolean, type: string, d: keyArr)=>{
-  if(b){
-    if(!sc_isMove.value) {
+// const sc_h1_move = (b: boolean, type: string, d: keyArr)=>{
+//   if(b){
+//     if(!sc_isMove.value) {
       
-      dType.value = type
+//       dType.value = type
       
-      dPoint.value = d
-      dPoint.value.forEach(el=>{
-         dif_X.value = elementX.value - (+rect[el]);
-         dif_Y.value = elementY.value - (+rect[el]);
-      })
+//       dPoint.value = d
+//       dPoint.value.forEach(el=>{
+//          dif_X.value = elementX.value - (+rect[el]);
+//          dif_Y.value = elementY.value - (+rect[el]);
+//       })
        
-      if(dType.value=='h') cursor.value = cursorArr.e
-      if(dType.value=='v') cursor.value = cursorArr.n
-      if(dType.value=='hv') cursor.value = cursorArr.ne
-      if(dType.value=='vh') cursor.value = cursorArr.nw
-      sc_isMove.value = true
-      resume()
-    }
-  } else MoveReset()
-}
+//       if(dType.value=='h') cursor.value = cursorArr.e
+//       if(dType.value=='v') cursor.value = cursorArr.n
+//       if(dType.value=='hv') cursor.value = cursorArr.ne
+//       if(dType.value=='vh') cursor.value = cursorArr.nw
+//       sc_isMove.value = true
+//       resume()
+//     }
+//   } else MoveReset()
+// }
 
-const MoveReset =()=>{
-  sc_isMove.value = false
-  cursor.value = cursorArr.a
-  pause()
-}
+// const MoveReset =()=>{
+//   sc_isMove.value = false
+//   cursor.value = cursorArr.a
+//   pause()
+// }
 
-const wer = ()=>{
-  if(sc_isMove.value){
+// const wer = ()=>{
+//   if(sc_isMove.value){
     
-    // dPoint.value.forEach((el: keyof RRect)=>{
-      if(rect.width>=40 && rect.height>=40){
+//     // dPoint.value.forEach((el: keyof RRect)=>{
+//       if(rect.width>=40 && rect.height>=40){
 
-        if(dType.value=='h') rect[dPoint.value[0]] = elementX.value - dif_X.value
-        if(dType.value=='v') rect[dPoint.value[0]] = elementY.value - dif_Y.value
-        if(dType.value=='hv') {
-          rect[dPoint.value[0]] = elementX.value - dif_X.value
-          rect[dPoint.value[1]] = elementY.value - dif_Y.value
-        } 
-      }
-      else {
-        if(dPoint.value[0]=='x1') rect.x1 = rect.x2 - 40
-        if(dPoint.value[0]=='x2') rect.x2 = rect.x1 + 40
-        if(dPoint.value[0]=='y1') rect.y1 = rect.y2 - 40
-        if(dPoint.value[0]=='y2') rect.y2 = rect.y1 + 40
+//         if(dType.value=='h') rect[dPoint.value[0]] = elementX.value - dif_X.value
+//         if(dType.value=='v') rect[dPoint.value[0]] = elementY.value - dif_Y.value
+//         if(dType.value=='hv') {
+//           rect[dPoint.value[0]] = elementX.value - dif_X.value
+//           rect[dPoint.value[1]] = elementY.value - dif_Y.value
+//         } 
+//       }
+//       else {
+//         if(dPoint.value[0]=='x1') rect.x1 = rect.x2 - 40
+//         if(dPoint.value[0]=='x2') rect.x2 = rect.x1 + 40
+//         if(dPoint.value[0]=='y1') rect.y1 = rect.y2 - 40
+//         if(dPoint.value[0]=='y2') rect.y2 = rect.y1 + 40
         
-        MoveReset()
-      } 
+//         MoveReset()
+//       } 
     // })
 
     // if(dPoint.value[0] == 'x1'){
@@ -133,33 +143,33 @@ const wer = ()=>{
     //   if(elementY.value>=rect.y1+30) 
     //   rect.y2 = elementY.value - dif_Y.value      
     // }
-  }
-}
+//   }
+// }
 
-const sc_H1 = computed(()=>{
-  return { x: rect.x1, y: rect.y1, w: 10, h: rect.height, c_type: cursorArr.e}
-})
-const sc_H2 = computed(()=>{
-  return { x: rect.x2-10, y: rect.y1, w: 10, h: rect.height, c_type: cursorArr.e}
-})
-const sc_V1 = computed(()=>{
-  return { x: rect.x1, y: rect.y1, w: rect.width, h: 10, c_type: cursorArr.n}
-})
-const sc_V2 = computed(()=>{
-  return { x: rect.x1, y: rect.y2-10, w: rect.width, h: 10, c_type: cursorArr.n}
-})
-const sc_H1V1 = computed(()=>{
-  return { x: rect.x1-10, y: rect.y1-10, w: 30, h: 30, c_type: cursorArr.nw}
-})
-const sc_H2V1 = computed(()=>{
-  return { x: rect.x2-20, y: rect.y1-10, w: 30, h: 30, c_type: cursorArr.ne}
-})
-const sc_H1V2 = computed(()=>{
-  return { x: rect.x1-10, y: rect.y2-20, w: 30, h: 30, c_type: cursorArr.ne}
-})
-const sc_H2V2 = computed(()=>{
-  return { x: rect.x2-20, y: rect.y2-20, w: 30, h: 30, c_type: cursorArr.nw}
-})
+// const sc_H1 = computed(()=>{
+//   return { x: rect.x1, y: rect.y1, w: 10, h: rect.height, c_type: cursorArr.e}
+// })
+// const sc_H2 = computed(()=>{
+//   return { x: rect.x2-10, y: rect.y1, w: 10, h: rect.height, c_type: cursorArr.e}
+// })
+// const sc_V1 = computed(()=>{
+//   return { x: rect.x1, y: rect.y1, w: rect.width, h: 10, c_type: cursorArr.n}
+// })
+// const sc_V2 = computed(()=>{
+//   return { x: rect.x1, y: rect.y2-10, w: rect.width, h: 10, c_type: cursorArr.n}
+// })
+// const sc_H1V1 = computed(()=>{
+//   return { x: rect.x1-10, y: rect.y1-10, w: 30, h: 30, c_type: cursorArr.nw}
+// })
+// const sc_H2V1 = computed(()=>{
+//   return { x: rect.x2-20, y: rect.y1-10, w: 30, h: 30, c_type: cursorArr.ne}
+// })
+// const sc_H1V2 = computed(()=>{
+//   return { x: rect.x1-10, y: rect.y2-20, w: 30, h: 30, c_type: cursorArr.ne}
+// })
+// const sc_H2V2 = computed(()=>{
+//   return { x: rect.x2-20, y: rect.y2-20, w: 30, h: 30, c_type: cursorArr.nw}
+// })
 
 
 </script>
@@ -188,7 +198,7 @@ const sc_H2V2 = computed(()=>{
       <div>posXY el: {{ elementX }}, {{ elementY }}</div>
       <div>isOutside: {{ isOutside }}</div>
       <div>rect:
-        <pre>{{ rr }}</pre>
+        <pre></pre>
       </div>
     </div>
     <svg class="draw_container" ref="target" viewBox="0 0 650 500" @mousedown="mouseDown" @mouseup="mouseUp">
@@ -205,20 +215,36 @@ const sc_H2V2 = computed(()=>{
         <path class="wallPC2" d="M 22.92 0 L 30 0 L 30 7.071 L 22.92 0"/>
       </pattern>  
 
-      <SvgRect v-if="isVisible" :rect="rect" />
-      <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H1"    @sc_h1_move="b=>sc_h1_move(b, 'h', ['x1'])" />
+      <template v-for="rect1, i in rectList" :key="rect1.id">
+        
+        <SvgRect
+          
+          v-if="isVisible" 
+          :elementX="elementX"
+          :elementY="elementY"
+          v-model:rect="rectList[i]" 
+          v-model:cursor="cursor" 
+          :drawStrat="isDraw"
+        />
+      </template>
+      <!-- <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H1"    @sc_h1_move="b=>sc_h1_move(b, 'h', ['x1'])" />
       <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H2"    @sc_h1_move="b=>sc_h1_move(b, 'h', ['x2'])" />
       <SvgSizeCorrect v-if="rect.isDone" :dd="sc_V1"    @sc_h1_move="b=>sc_h1_move(b, 'v', ['y1'])" />
       <SvgSizeCorrect v-if="rect.isDone" :dd="sc_V2"    @sc_h1_move="b=>sc_h1_move(b, 'v', ['y2'])" />
       <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H1V1"  @sc_h1_move="b=>sc_h1_move(b, 'hv', ['x1', 'y1'])" />
       <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H2V1"  @sc_h1_move="b=>sc_h1_move(b, 'vh', ['x2', 'y1'])" />
       <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H1V2"  @sc_h1_move="b=>sc_h1_move(b, 'hv', ['x1', 'y2'])" />
-      <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H2V2"  @sc_h1_move="b=>sc_h1_move(b, 'vh', ['x2', 'y2'])" />
+      <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H2V2"  @sc_h1_move="b=>sc_h1_move(b, 'vh', ['x2', 'y2'])" /> -->
       
     </svg>
     <div class="d_control absolute left-full t-0 px-3">
       <div class="dc_item" @click="rectClear">
         <svg class="w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
+      </div>
+      <div class="dc_item">
+        <svg viewBox="0 0 30 30" width="20" height="20">
+          <path d="M 0 0 h 30 v 30 h -30 v -30 Z M 8 8 h 14 v 14 h -14 v -14 Z" fill="url(#wall-pattern)"/>
+        </svg>
       </div>
       <div class="dc_item">
         <svg viewBox="0 0 30 30" width="20" height="20">

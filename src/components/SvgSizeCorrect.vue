@@ -22,7 +22,7 @@ const d = computed(()=>{
 
 <style lang="scss" scoped>
   path{
-    fill: rgba(0,255,0,1);
+    fill: rgb(0, 192, 0);
     fill-opacity: 0;
     &:hover{ fill-opacity: 0.5}    
   }

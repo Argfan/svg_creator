@@ -1,43 +1,51 @@
 <script setup lang="ts">
-import { useMouseInElement, watchPausable } from '@vueuse/core';
-import { reactive, ref, computed, watch, Ref } from 'vue';
+import { useMouseInElement, watchOnce, watchPausable } from '@vueuse/core';
+import { reactive, ref, computed, watch, Ref, onMounted, toRef, toRefs } from 'vue';
 import SvgRect from './SvgRect.vue'
 import RRect from '../models/RRect';
 import SvgSizeCorrect from './SvgSizeCorrect.vue'
 import cursorArr from '../moks/cursorArr';
+import SvgDrawRect from './SvgDrawRect.vue';
+import { useMEStore } from '../store/useMEStore';
 
 const target = ref(null)
 
-const { x, y, elementX, elementY, isOutside } = useMouseInElement(target)
+// const { x, y, elementX, elementY, isOutside } = useMouseInElement(target)
 
+const me = useMEStore()
+const { x, y, elementX, elementY, isOutside, elementWidth, elementHeight } = toRefs(me)
+// const {sourceType, x, y, elementX, elementY, isOutside, elementPositionX, elementPositionY, elementWidth, elementHeight } = useMouseInElement(target)
 
-
-// const rect = reactive(new RRect())
-// const rect = reactive(new RRect())
+const viewBox = reactive({
+  x: 0, y: 0, w: 0, h: 0
+})
 
 const rectList:Ref<RRect[]> = ref([])
+const rectTemp = reactive(new RRect)
 
 const isDrawRect = ref(false)
 
 const isDraw = ref(false)
-const sc_isMove = ref(false)
-
-const dif_X  = ref(0)
-const dif_Y  = ref(0)
 
 const cursor = ref(cursorArr.a)
 
 const mouseDown = () => {  
   if(isDrawRect.value){
-    rectList.value.push(new RRect())
-    isDraw.value = true
-  }
-  
+    isDraw.value = true    
+  }  
 }
 
 const mouseUp = () => {
   isDraw.value = false
-
+  if(isDrawRect.value) {
+    isDrawRect.value = false
+    if(rectTemp.width>40 && rectTemp.height>40) {
+      rectTemp.isDone = true
+      rectList.value.push({...rectTemp})
+    } 
+    cursor.value = cursorArr.a
+    Object.assign(rectTemp, new RRect)
+  }
   // if(isVisible.value) rect.isDone = true 
   
 }
@@ -66,6 +74,42 @@ const rectClear = ()=>{
   // Object.assign(rect, new RRect())
   rectList.value.pop()
 }
+const updateRect = (i: number, r:RRect)=>{
+  rectList.value[i]=r
+}
+const addRect = ()=>{
+  isDrawRect.value = true
+  cursor.value = cursorArr.c  
+}
+
+const viewBoxScaling = (n: number)=>{
+  
+  viewBox.x-=viewBox.w*n
+  viewBox.y-=viewBox.h*n
+  viewBox.w/=n
+  viewBox.h/=n
+}
+
+watchOnce(elementWidth, ()=>{
+  console.log(elementWidth.value);
+  console.log(elementHeight.value);
+  viewBox.w = Math.round(elementWidth.value) 
+  viewBox.h = Math.round(elementHeight.value) 
+  
+})
+
+onMounted(()=>{
+  me.MEInint(target.value)
+  console.log(target.value);
+  
+  console.log(elementWidth.value);
+  // console.log(elementHeight.value); 
+  
+  // viewBox.w = elementWidth.value
+  // viewBox.h = elementHeight.value
+})
+
+
 
 // const { pause, resume } = watchPausable(
 //   [elementX, elementY], () => wer(),
@@ -191,17 +235,23 @@ const rectClear = ()=>{
   </svg> -->
 
   <div class="svg_container flex relative"
-    :style="{'cursor': cursor}"
+    
   >
     <div class="info p-3">      
       <div>posXY: {{ x }}, {{ y }}</div>
       <div>posXY el: {{ elementX }}, {{ elementY }}</div>
       <div>isOutside: {{ isOutside }}</div>
-      <div>rect:
-        <pre></pre>
+      <div>size: {{ elementWidth }}, {{ elementHeight }}</div>
+      <div>info:
+        <pre>{{ viewBox }}</pre>
       </div>
     </div>
-    <svg class="draw_container" ref="target" viewBox="0 0 650 500" @mousedown="mouseDown" @mouseup="mouseUp">
+    <svg class="draw_container" ref="target" 
+      :viewBox="`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`" 
+      @mousedown="mouseDown" 
+      @mouseup="mouseUp"
+      :style="{'cursor': cursor}"
+    >
       <pattern
         id="wall-pattern"
         width="10"
@@ -213,20 +263,22 @@ const rectClear = ()=>{
         <path class="wallPC2" d="M 0 0 L 7.071 0 L 30 22.92 L 30 30 L 22.92 30 L 0 7.071 L 0 0"/>
         <path class="wallPC2" d="M 0 22.92 L 7.071 30 L 0 30 L 0 22.92"/>
         <path class="wallPC2" d="M 22.92 0 L 30 0 L 30 7.071 L 22.92 0"/>
-      </pattern>  
-
-      <template v-for="rect1, i in rectList" :key="rect1.id">
+      </pattern>       
         
-        <SvgRect
-          
-          v-if="isVisible" 
-          :elementX="elementX"
-          :elementY="elementY"
-          v-model:rect="rectList[i]" 
-          v-model:cursor="cursor" 
-          :drawStrat="isDraw"
-        />
-      </template>
+      <SvgRect
+        v-for="(rect, i) in rectList" :key="rect.id"
+        v-if="isVisible" 
+        :rect="rect" 
+        v-model:cursor="cursor"
+        @updateRect="updateRect(i, $event)"
+      />
+
+      <SvgDrawRect 
+        v-if="isDrawRect"
+        v-model:rect="rectTemp" 
+        :drawStrat="isDraw"
+      />
+      
       <!-- <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H1"    @sc_h1_move="b=>sc_h1_move(b, 'h', ['x1'])" />
       <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H2"    @sc_h1_move="b=>sc_h1_move(b, 'h', ['x2'])" />
       <SvgSizeCorrect v-if="rect.isDone" :dd="sc_V1"    @sc_h1_move="b=>sc_h1_move(b, 'v', ['y1'])" />
@@ -241,7 +293,7 @@ const rectClear = ()=>{
       <div class="dc_item" @click="rectClear">
         <svg class="w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
       </div>
-      <div class="dc_item">
+      <div class="dc_item" @click="addRect" :class="{'active': isDrawRect}">
         <svg viewBox="0 0 30 30" width="20" height="20">
           <path d="M 0 0 h 30 v 30 h -30 v -30 Z M 8 8 h 14 v 14 h -14 v -14 Z" fill="url(#wall-pattern)"/>
         </svg>
@@ -255,6 +307,15 @@ const rectClear = ()=>{
         <svg viewBox="0 0 30 30" width="20" height="20">
           <path d="M 0 10 v 10 h 30 v -10 h -10 Z" fill="url(#wall-pattern)"/>
         </svg>
+      </div>
+      <div class="dc_item" @click="viewBoxScaling(2)">
+        x2
+      </div>
+      <div class="dc_item" @click="viewBoxScaling(0.5)">
+        x0.5
+      </div>    
+      <div class="dc_item" @click="viewBoxScaling(1)">
+        x1
       </div>
     </div>
 

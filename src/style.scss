@@ -9,7 +9,8 @@ html{
   --bg-color4: #00aaff3b;
 
   --bg-btn-c1: #00aaffd5;
-  --bg-pt1-color: #0059be;
+  --bg-pt1-color: #3588e6;
+  --bg-pt2-color: #95c6ff;
 
   --border-color1: #b5b5b5;
   --border-color2: #00aaff6e;
@@ -19,7 +20,8 @@ html{
     --bg-color1: #171616;
     --border-color1: #5a5a5a;
     --color1: #fff;
-    --bg-pt1-color: #f0f0f0;
+    --bg-pt1-color: #838383;
+    --bg-pt2-color: #cbcbcb;
   }
 }
 
@@ -45,7 +47,7 @@ body{
   }
 
   .draw_container {
-    width: 650px;
+    width: 500px;
     height: 500px;
   }
   .centerT{
@@ -59,13 +61,13 @@ body{
 pattern#wall-pattern{
   animation: wspin 10s linear infinite;
   rect, path{
-    fill: var(--bg-pt1-color);
+    // fill: var(--bg-pt1-color);
   }
   rect{
-    fill-opacity: 0.3;
+    fill: var(--bg-pt1-color);
   }
   path{
-    fill-opacity: 0.7;
+    fill: var(--bg-pt2-color);;
   }
 }
 
@@ -97,7 +99,7 @@ html.dark{
     cursor: pointer;
     opacity: 0.8;
     transition: 0.2s;
-    &:hover{
+    &:hover, &.active{
       opacity: 1;
       border-color: var(--bg-color3);
     }

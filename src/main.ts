@@ -1,13 +1,11 @@
 import { createApp } from 'vue'
 import './style.scss'
 
-// import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-
-
 import App from './App.vue'
+import { createPinia } from 'pinia'
 
 const app = createApp(App)
+const pinia = createPinia()
 
-// app.component('font-awesome-icon', FontAwesomeIcon)
-
+app.use(pinia)
 app.mount('#app')

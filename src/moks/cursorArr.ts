@@ -7,4 +7,6 @@ export default {
   n: 'n-resize',
   ne: 'ne-resize',
   nw: 'nw-resize',
+  g: 'grab',
+  gn: 'grabbing',
 }

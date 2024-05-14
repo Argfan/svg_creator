@@ -65,7 +65,7 @@ const sc_H1 = computed(()=>{
       :d="d"
       fill="url(#wall-pattern)"
     />
-    <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H1" @sc_h1_move="b=>sc_h1_move(b, 'h', ['x1'])" />
+    <!-- <SvgSizeCorrect v-if="rect.isDone" :dd="sc_H1" @sc_h1_move="b=>sc_h1_move(b, 'h', ['x1'])" /> -->
   </g> 
 
 </template>

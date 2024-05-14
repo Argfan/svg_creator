@@ -49,13 +49,11 @@ pause()
 watchAtMost(
   drawStrat, 
   (b)=>{    
-    if(b) {
-      console.log(elementX.value, 0, elementWidth.value, viewBox.x, viewBox.x+viewBox.w);
-      
+    if(b) {      
       rect.value.x = tempX()
       rect.value.y = tempY()
       resume()
-    } else pause()
+    } else stop()
   },
   {count: 2}
   

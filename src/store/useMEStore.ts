@@ -2,7 +2,7 @@ import { useMouseInElement } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useMEStore = defineStore('mouseElement', ()=>{
+export const useMEStore = defineStore('MEStore', ()=>{
 
   const target = ref(null)
 

@@ -9,6 +9,7 @@ export default class RRect {
   width: number = 0
   height: number = 0
   rx: number = 3
+  w: number = 10
   isDone: boolean = false
 
   moveX:string= 'x1'

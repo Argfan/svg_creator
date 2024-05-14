@@ -29,6 +29,7 @@ body{
   background-color: var(--bg-color1);
   color: var(--color1);
   transition: 0.2s background-color;
+  // height: 3000px;
 }
 
 .svg_container {
@@ -43,12 +44,13 @@ body{
 
   .info {
     border-right: 1px solid var(--border-color1);
-    width: 170px;
+    width: 250px;
   }
 
   .draw_container {
     width: 500px;
-    height: 500px;
+    height: 100%;
+    min-height: 500px;
   }
   .centerT{
     transform-box: fill-box;
@@ -60,9 +62,7 @@ body{
 
 pattern#wall-pattern{
   animation: wspin 10s linear infinite;
-  rect, path{
-    // fill: var(--bg-pt1-color);
-  }
+
   rect{
     fill: var(--bg-pt1-color);
   }
@@ -99,16 +99,13 @@ html.dark{
     cursor: pointer;
     opacity: 0.8;
     transition: 0.2s;
+    font-size: 0.65rem;
     &:hover, &.active{
       opacity: 1;
       border-color: var(--bg-color3);
     }
     path{
       stroke: none;
-    }
-    // rect, path{
-    //   --bg-pt1-color: 
-    // }
-    
+    }    
   }
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, toRefs, watch } from 'vue';
 import RRect from '../models/RRect';
-import SizeHelp from '../models/SizeHelp';
+
 import {dCreator} from '../service/helper';
 
 import SvgSizeCorrect from './SvgSizeCorrect.vue'
@@ -29,22 +29,9 @@ const {rect, cursor} = toRefs(prop)
 const dif_X  = ref(0)
 const dif_Y  = ref(0)
 
-const Sizeh = computed(() => {
-  return {
-    x1: rect.value.x1,
-    x2: rect.value.x2,
-    y1: rect.value.y1,
-    y2: rect.value.y2,
-    width: rect.value.width,
-    height: rect.value.height,
-  } as SizeHelp
-})
-
-
-
 
 const d = computed(()=>{
-  return  rect.value.width>20 && rect.value.height>20 ? dCreator(rect.value) + dCreator(rect.value, 10) : dCreator(rect.value)
+  return  rect.value.width>20 && rect.value.height>20 ? dCreator(rect.value) + dCreator(rect.value, rect.value.w) : dCreator(rect.value)
 })
 const wer = ()=>{
   
@@ -73,7 +60,6 @@ const sc_H1 = computed(()=>{
 
 <template>
   <g>
-    <!-- <SvgSizeHelp :size="Sizeh" />   -->
     <path
       @click="wer"
       :d="d"

@@ -3,14 +3,16 @@ import { computed, ref, toRefs, watch } from 'vue';
 import RRect from '../models/RRect';
 import SvgSizeHelp from './SvgSizeHelp.vue';
 import SizeHelp from '../models/SizeHelp';
-import {dCreator} from '../service/helper';
+import {dCreator, mapp} from '../service/helper';
 
 
 import { watchAtMost, watchPausable } from '@vueuse/core';
 import { useMEStore } from '../store/useMEStore';
+import { useScalingContainer } from '../store/useScalingContainer';
+import { useViewBox } from '../store/useViewBox';
 
 const me = useMEStore()
-const { elementX, elementY } = toRefs(me)
+const { elementX, elementY, elementWidth, elementHeight } = toRefs(me)
 
 interface propType {
   rect: RRect,
@@ -37,7 +39,8 @@ const Sizeh = computed(() => {
   } as SizeHelp
 })
 
-
+const {scaling} = useScalingContainer()
+const {viewBox} = useViewBox()
 
 const { stop, pause, resume } = watchPausable(
   [elementX, elementY], () => wer(),
@@ -47,8 +50,10 @@ watchAtMost(
   drawStrat, 
   (b)=>{    
     if(b) {
-      rect.value.x = elementX.value
-      rect.value.y = elementY.value
+      console.log(elementX.value, 0, elementWidth.value, viewBox.x, viewBox.x+viewBox.w);
+      
+      rect.value.x = tempX()
+      rect.value.y = tempY()
       resume()
     } else pause()
   },
@@ -56,17 +61,24 @@ watchAtMost(
   
 )
 
+const tempX = ()=>{  
+  return mapp(elementX.value, 0, elementWidth.value, viewBox.x, viewBox.x+viewBox.w)
+}
+const tempY = ()=>{
+  return mapp(elementY.value, 0, elementHeight.value, viewBox.y, viewBox.y+viewBox.h)
+}
+
 const d = computed(()=>{
-  return  rect.value.width>20 && rect.value.height>20 ? dCreator(rect.value) + dCreator(rect.value, 10) : dCreator(rect.value)
+  return  rect.value.width>20 && rect.value.height>20 ? dCreator(rect.value) + dCreator(rect.value, rect.value.w) : dCreator(rect.value)
 })
 const wer = ()=>{
   console.log('asd');
   
   if(drawStrat.value && !rect.value.isDone) {
-    rect.value.x1 = Math.round(Math.min(rect.value.x, elementX.value))
-    rect.value.x2 = Math.round(Math.max(rect.value.x, elementX.value))
-    rect.value.y1 = Math.round(Math.min(rect.value.y, elementY.value))
-    rect.value.y2 = Math.round(Math.max(rect.value.y, elementY.value))
+    rect.value.x1 = Math.round(Math.min(rect.value.x, tempX()))
+    rect.value.x2 = Math.round(Math.max(rect.value.x, tempX()))
+    rect.value.y1 = Math.round(Math.min(rect.value.y, tempY()))
+    rect.value.y2 = Math.round(Math.max(rect.value.y, tempY()))
 
     rect.value.width = Math.abs(rect.value.x1 - rect.value.x2)
     rect.value.height = Math.abs(rect.value.y1 - rect.value.y2)

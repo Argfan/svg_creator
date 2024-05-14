@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { useMouseInElement, watchOnce, watchPausable } from '@vueuse/core';
-import { reactive, ref, computed, watch, Ref, onMounted, toRef, toRefs } from 'vue';
+import { useEventListener, useMouseInElement, useScroll, useWindowScroll, watchOnce, watchPausable } from '@vueuse/core';
+import { reactive, ref, computed, watch, Ref, onMounted, toRef, toRefs, onUnmounted } from 'vue';
 import SvgRect from './SvgRect.vue'
 import RRect from '../models/RRect';
 import SvgSizeCorrect from './SvgSizeCorrect.vue'
 import cursorArr from '../moks/cursorArr';
 import SvgDrawRect from './SvgDrawRect.vue';
 import { useMEStore } from '../store/useMEStore';
+import ScalingArray from '../moks/ScalingArray';
+import { useScalingContainer } from '../store/useScalingContainer';
+import { useViewBox } from '../store/useViewBox';
+import ViewBox from '../models/ViewBox';
 
 const target = ref(null)
 
@@ -16,9 +20,8 @@ const me = useMEStore()
 const { x, y, elementX, elementY, isOutside, elementWidth, elementHeight } = toRefs(me)
 // const {sourceType, x, y, elementX, elementY, isOutside, elementPositionX, elementPositionY, elementWidth, elementHeight } = useMouseInElement(target)
 
-const viewBox = reactive({
-  x: 0, y: 0, w: 0, h: 0
-})
+
+const viewBox = reactive(new ViewBox())
 
 const rectList:Ref<RRect[]> = ref([])
 const rectTemp = reactive(new RRect)
@@ -82,20 +85,42 @@ const addRect = ()=>{
   cursor.value = cursorArr.c  
 }
 
-const viewBoxScaling = (n: number)=>{
-  
-  viewBox.x-=viewBox.w*n
-  viewBox.y-=viewBox.h*n
-  viewBox.w/=n
-  viewBox.h/=n
+const {sArrSet} = useScalingContainer()
+const {viewBoxSet} = useViewBox()
+
+
+
+const sArr = ScalingArray
+const sIndex = ref(4)
+
+// const vbs:Ref<number> = ref(sArr[sIndex.value])
+
+const vbScaling = (n: number)=>{
+  sIndex.value = n
+  viewBoxScaling()
+}
+
+const viewBoxScaling = ()=>{  
+  const w = viewBox.ws * 100/sArr[sIndex.value]
+  const h = viewBox.hs * 100/sArr[sIndex.value]
+
+  viewBox.x = viewBox.xs - (w - viewBox.ws)/2
+  viewBox.y = viewBox.ys - (h - viewBox.hs)/2
+  viewBox.w = w
+  viewBox.h = h
+
+  viewBoxSet(viewBox)
+  sArrSet(sIndex.value)
 }
 
 watchOnce(elementWidth, ()=>{
   console.log(elementWidth.value);
   console.log(elementHeight.value);
-  viewBox.w = Math.round(elementWidth.value) 
-  viewBox.h = Math.round(elementHeight.value) 
-  
+  viewBox.ws = Math.round(elementWidth.value) 
+  viewBox.hs = Math.round(elementHeight.value) 
+  viewBox.w=viewBox.ws
+  viewBox.h=viewBox.hs
+  viewBoxSet(viewBox)
 })
 
 onMounted(()=>{
@@ -103,11 +128,34 @@ onMounted(()=>{
   console.log(target.value);
   
   console.log(elementWidth.value);
+  console.log('scroll');
   // console.log(elementHeight.value); 
   
   // viewBox.w = elementWidth.value
   // viewBox.h = elementHeight.value
+
+  // window.addEventListener('click', ()=>{
+  //   console.log('scroll');  
+  // })
 })
+
+onUnmounted(()=>{
+  // window.removeEventListener('click', ()=>{
+  //   'remove'
+  // })
+})
+
+
+
+useEventListener(window, 'mousewheel', (evt: WheelEvent) => {
+  if(!isOutside.value) {
+    if (evt.deltaY<0 && sIndex.value<sArr.length-1) sIndex.value+=1
+    if (evt.deltaY>0 && sIndex.value>0) sIndex.value-=1
+    
+    viewBoxScaling()
+  }
+})
+
 
 
 
@@ -242,9 +290,13 @@ onMounted(()=>{
       <div>posXY el: {{ elementX }}, {{ elementY }}</div>
       <div>isOutside: {{ isOutside }}</div>
       <div>size: {{ elementWidth }}, {{ elementHeight }}</div>
-      <div>info:
+      <div>viewBox:
         <pre>{{ viewBox }}</pre>
       </div>
+      <div>rectTemp:
+        <pre>{{ rectTemp }}</pre>
+      </div>
+
     </div>
     <svg class="draw_container" ref="target" 
       :viewBox="`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`" 
@@ -276,6 +328,7 @@ onMounted(()=>{
       <SvgDrawRect 
         v-if="isDrawRect"
         v-model:rect="rectTemp" 
+        
         :drawStrat="isDraw"
       />
       
@@ -308,15 +361,21 @@ onMounted(()=>{
           <path d="M 0 10 v 10 h 30 v -10 h -10 Z" fill="url(#wall-pattern)"/>
         </svg>
       </div>
-      <div class="dc_item" @click="viewBoxScaling(2)">
-        x2
+      <div class="dc_item" @click="vbScaling(2)">
+        50%
       </div>
-      <div class="dc_item" @click="viewBoxScaling(0.5)">
-        x0.5
+      <div class="dc_item" @click="vbScaling(4)">
+        100%
+      </div>
+      <div class="dc_item" @click="vbScaling(5)">
+        150%
       </div>    
-      <div class="dc_item" @click="viewBoxScaling(1)">
-        x1
-      </div>
+      <div class="dc_item" @click="vbScaling(6)">
+        200%
+      </div>    
+      <div class="dc_item" @click="vbScaling(7)">
+        400%
+      </div>    
     </div>
 
   </div>

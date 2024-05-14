@@ -12,3 +12,8 @@ export const dCreator = (rect: any, w=0)=>{
 export const creat_rect = (x: number, y: number, w: number, h:number)=>{
   return `M ${x} ${y} h ${w} v ${h} h ${-w} v ${-h} z`
 }
+
+export const mapp = (v: number, a: number, b: number, c: number, d: number): number=>{
+  const r = Math.abs(b-a) / v
+  return Math.abs(d-c) / r + c
+}
